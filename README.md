@@ -30,7 +30,7 @@ The TMP119 supports up to four I2C addresses, selected by the ADD0 pin:
 
 Initialize the sensor. This needs to be called before using any other methods.
 It verifies the device ID and configures the sensor for the fastest update rate
-(no averaging, shortest standby delay, ~15.5 ms cycle). Call `set_averaging()` /
+(no averaging, no added standby delay, ~15.5 ms cycle). Call `set_averaging()` /
 `set_read_delay()` afterwards to trade speed for lower noise.
 
     sensor.init()
@@ -64,30 +64,31 @@ degrees Centigrade if invalid units specified. Call `read()` to update.
 
 ### set_averaging(avg)
 
-Set the conversion averaging mode. More averaging reduces noise but lengthens
-the conversion cycle. Returns True if the write succeeded.
+Set the conversion averaging mode. More averaging reduces noise but takes
+longer to produce each result. Returns True if the write succeeded.
 
     sensor.set_averaging(tmp119.TMP119_AVERAGE_64X)
 
-Valid arguments are:
+Valid arguments are (with the time each takes per result):
 
-    tmp119.TMP119_AVERAGE_1X
-    tmp119.TMP119_AVERAGE_8X
-    tmp119.TMP119_AVERAGE_32X
-    tmp119.TMP119_AVERAGE_64X
+    tmp119.TMP119_AVERAGE_1X    # 15.5 ms
+    tmp119.TMP119_AVERAGE_8X    # 125 ms
+    tmp119.TMP119_AVERAGE_32X   # 500 ms
+    tmp119.TMP119_AVERAGE_64X   # 1 s
 
 ### set_read_delay(delay)
 
-Set the minimum standby delay between conversions in continuous-conversion
-mode. The resulting conversion cycle time depends on both this and the
-averaging setting (see datasheet Table 8-6). Returns True if the write
-succeeded.
+Set the *minimum* standby delay between conversions in continuous-conversion
+mode. The actual time between readings is the greater of this standby delay and
+the averaging time (see datasheet Table 8-6); for example, `TMP119_AVERAGE_64X`
+always yields at least a ~1 s cycle because the averaging alone takes 1 s,
+regardless of the delay setting. Returns True if the write succeeded.
 
     sensor.set_read_delay(tmp119.TMP119_DELAY_1000_MS)
 
 Valid arguments are:
 
-    tmp119.TMP119_DELAY_0_MS
+    tmp119.TMP119_DELAY_NONE
     tmp119.TMP119_DELAY_125_MS
     tmp119.TMP119_DELAY_250_MS
     tmp119.TMP119_DELAY_500_MS

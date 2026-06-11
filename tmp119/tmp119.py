@@ -11,16 +11,25 @@ UNITS_Fahrenheit = 2
 UNITS_Kelvin = 3
 
 # Conversion averaging mode (AVG[1:0], config register bits 6:5).
-# More averaging reduces noise but lengthens the conversion cycle.
-TMP119_AVERAGE_1X = 0   # No averaging
-TMP119_AVERAGE_8X = 1   # 8 averaged conversions (power-on default)
-TMP119_AVERAGE_32X = 2  # 32 averaged conversions
-TMP119_AVERAGE_64X = 3  # 64 averaged conversions
+# More averaging reduces noise but takes longer to produce each result. The
+# time to compute one averaged result is the per-mode minimum conversion time
+# shown below (datasheet Table 8-6). Power-on default: TMP119_AVERAGE_8X.
+TMP119_AVERAGE_1X = 0   # No averaging   (min conversion time 15.5 ms)
+TMP119_AVERAGE_8X = 1   # 8 conversions  (min conversion time 125 ms, default)
+TMP119_AVERAGE_32X = 2  # 32 conversions (min conversion time 500 ms)
+TMP119_AVERAGE_64X = 3  # 64 conversions (min conversion time 1 s)
 
-# Minimum standby delay between conversions in continuous-conversion mode
-# (CONV[2:0], config register bits 9:7). The total cycle time also depends on
-# the averaging setting (see datasheet Table 8-6).
-TMP119_DELAY_0_MS = 0
+# Minimum standby delay inserted between conversions in continuous-conversion
+# mode (CONV[2:0], config register bits 9:7).
+#
+# This is not the actual time between readings on its own. The actual
+# conversion cycle time is the greater of this standby delay and the time
+# needed by the selected averaging mode (see the averaging constants above).
+# For example, TMP119_DELAY_NONE with TMP119_AVERAGE_64X still produces a ~1 s
+# cycle because the 64x average alone takes 1 s. See datasheet Table 8-6.
+#
+# Power-on default: TMP119_DELAY_1000_MS.
+TMP119_DELAY_NONE = 0     # no added standby delay
 TMP119_DELAY_125_MS = 1
 TMP119_DELAY_250_MS = 2
 TMP119_DELAY_500_MS = 3
@@ -80,9 +89,9 @@ class TMP119:
         if self.get_device_id() != self._DEVICE_ID:
             return False
 
-        # Configure for the fastest update rate: no averaging and the shortest
+        # Configure for the fastest update rate: no averaging and no added
         # standby delay, giving a ~15.5 ms conversion cycle (datasheet Table
-        # 8-6). Clearing the AVG and CONV bits sets AVG = 1X and delay = 0 ms.
+        # 8-6). Clearing the AVG and CONV bits sets AVG = 1X and delay = none.
         config = self.get_config()
         config &= ~(self._AVG_MASK | self._CONV_MASK)
         return self.set_config(config)

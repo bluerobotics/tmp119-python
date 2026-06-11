@@ -14,8 +14,9 @@ setup(name='bluerobotics-tmp119',
       author_email='support@bluerobotics.com',
       url='https://www.bluerobotics.com',
       packages=find_packages(),
+      python_requires='>=3.6',
       classifiers=[
-          "Programming Language :: Python",
+          "Programming Language :: Python :: 3",
           "License :: OSI Approved :: MIT License",
           "Operating System :: OS Independent",
       ]

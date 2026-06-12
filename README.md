@@ -5,9 +5,28 @@ an ultra-high-accuracy, low-power digital temperature sensor from Texas
 Instruments with an I2C-compatible interface. Tested on Raspberry Pi with
 Raspberry Pi OS.
 
-The python SMBus library must be installed.
+# Installation
+
+This library uses the Python SMBus library, which is installed via apt:
 
     sudo apt-get install python3-smbus
+
+Install the package from PyPI (note the package name differs from the import
+name, which is `tmp119`):
+
+    pip install bluerobotics-tmp119
+
+On Raspberry Pi OS (Bookworm and newer), a system-wide `pip install` may fail
+with `error: externally-managed-environment`. Install into a virtual
+environment that can still see the apt-installed `smbus`:
+
+    python3 -m venv --system-site-packages ~/tmp119-env
+    source ~/tmp119-env/bin/activate
+    pip install bluerobotics-tmp119
+
+To install the latest unreleased code straight from a branch instead:
+
+    pip install "git+https://github.com/bluerobotics/tmp119-python.git@dev"
 
 # Usage
 
